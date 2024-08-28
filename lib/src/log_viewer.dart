@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:log_viewer/src/tab_views/http_log_view.dart';
+import 'package:log_viewer/src/tab_views/log_view.dart';
 
 class LogViewer extends StatefulWidget {
   static void showDebugButton(BuildContext context) {
@@ -57,7 +58,16 @@ class _LogViewerState extends State<LogViewer>
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            HttpLogModel.instance.clear();
+            switch (_controller.index) {
+              case 0:
+                HttpLogModel.instance.clear();
+                break;
+              case 1:
+                break;
+              case 2:
+                LogViewModel.instance.clear();
+                break;
+            }
           },
           child: const Text("Clear"),
         ),
@@ -78,7 +88,7 @@ class _LogViewerState extends State<LogViewer>
                 child: TabBarView(controller: _controller, children: const [
               HttpLogView(),
               HttpLogView(),
-              HttpLogView(),
+              LogView(),
             ]))
           ],
         ),
