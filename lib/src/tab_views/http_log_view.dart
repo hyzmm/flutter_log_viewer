@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:log_viewer/src/pages/http_request_detail_page.dart';
 
 class HttpLogView extends StatelessWidget {
   const HttpLogView({super.key});
@@ -15,94 +16,102 @@ class HttpLogView extends StatelessWidget {
             itemCount: HttpLogModel.instance.httpLogs.length,
             itemBuilder: (context, index) {
               final log = HttpLogModel.instance.httpLogs[index];
-              return Card(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Text(log.method,
-                              style: TextStyle(
-                                color: _getMethodColor(log.method),
-                                fontWeight: FontWeight.w700,
-                              )),
-                          _buildStatusCodeTag(log.statusCode),
-                          const Spacer(),
-                          TextButton(
-                              onPressed: () {
-                                final text = _dioRequestToCurl(log.request);
-                                Clipboard.setData(ClipboardData(text: text));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text.rich(
-                                      TextSpan(children: [
-                                        const TextSpan(text: "Copy cURL "),
-                                        TextSpan(
-                                          text: text,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ]),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: const Text("Copy as cURL")),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            log.uri.path.toString(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const Spacer(),
-                          TextButton(
-                              onPressed: () {
-                                Clipboard.setData(
-                                    ClipboardData(text: log.uri.toString()));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text.rich(
-                                      TextSpan(children: [
-                                        const TextSpan(text: "Copy "),
-                                        TextSpan(
-                                            text: log.uri.toString(),
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => HttpRequestDetailPage(log)));
+                },
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Text(log.method,
+                                style: TextStyle(
+                                  color: getRequestMethodColor(log.method),
+                                  fontWeight: FontWeight.w700,
+                                )),
+                            _buildStatusCodeTag(log.statusCode),
+                            const Spacer(),
+                            TextButton(
+                                onPressed: () {
+                                  final text = _dioRequestToCurl(log.request);
+                                  Clipboard.setData(ClipboardData(text: text));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text.rich(
+                                        TextSpan(children: [
+                                          const TextSpan(text: "Copy cURL "),
+                                          TextSpan(
+                                            text: text,
                                             style: const TextStyle(
-                                                fontWeight: FontWeight.bold)),
-                                      ]),
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ]),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              child: const Text("Copy")),
-                        ],
-                      ),
-                      Text.rich(
-                        TextSpan(children: [
-                          TextSpan(text: _formatIntoHHMMSSmmm(log.startTime)),
-                          const TextSpan(text: '\t'),
-                          if (log.endTime != null)
-                            TextSpan(
-                              text:
-                                  '${(log.endTime!.difference(log.startTime)).inMilliseconds}ms',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                        ]),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).hintColor,
+                                  );
+                                },
+                                child: const Text("Copy as cURL")),
+                          ],
                         ),
-                      )
-                    ],
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                log.uri.path.toString(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                              ),
+                            ),
+                            TextButton(
+                                onPressed: () {
+                                  Clipboard.setData(
+                                      ClipboardData(text: log.uri.toString()));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text.rich(
+                                        TextSpan(children: [
+                                          const TextSpan(text: "Copy "),
+                                          TextSpan(
+                                              text: log.uri.toString(),
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold)),
+                                        ]),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text("Copy")),
+                          ],
+                        ),
+                        Text.rich(
+                          TextSpan(children: [
+                            TextSpan(text: _formatIntoHHMMSSmmm(log.startTime)),
+                            const TextSpan(text: '\t'),
+                            if (log.endTime != null)
+                              TextSpan(
+                                text:
+                                    '${(log.endTime!.difference(log.startTime)).inMilliseconds}ms',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                          ]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).hintColor,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -132,6 +141,7 @@ class HttpLogView extends StatelessWidget {
 }
 
 class HttpLogModel with ChangeNotifier {
+  static const kMaxRecords = 500;
   static final instance = HttpLogModel();
   final List<HttpLog> _httpLogs = [];
 
@@ -139,6 +149,14 @@ class HttpLogModel with ChangeNotifier {
 
   void add(HttpLog httpLog) {
     _httpLogs.add(httpLog);
+    if (_httpLogs.length > kMaxRecords) {
+      _httpLogs.removeAt(0);
+    }
+    notifyListeners();
+  }
+
+  void clear() {
+    _httpLogs.clear();
     notifyListeners();
   }
 }
@@ -152,6 +170,7 @@ class HttpLog {
   RequestOptions request;
   Map<String, dynamic>? response;
   Exception? error;
+  Map<String, dynamic>? responseHeaders;
 
   HttpLog({required this.method, required this.uri, required this.request});
 }
@@ -180,6 +199,9 @@ class HttpLogInterceptor extends Interceptor {
       log.endTime = DateTime.now();
       log.statusCode = response.statusCode;
       log.response = response.data as Map<String, dynamic>?;
+      log.responseHeaders = response.headers.map.map((key, value) {
+        return MapEntry(key, value.join(", "));
+      });
       handler.next(response);
     }
   }
@@ -199,7 +221,7 @@ class HttpLogInterceptor extends Interceptor {
   }
 }
 
-Color _getMethodColor(String method) {
+Color getRequestMethodColor(String method) {
   switch (method) {
     case "GET":
       return Colors.green;
