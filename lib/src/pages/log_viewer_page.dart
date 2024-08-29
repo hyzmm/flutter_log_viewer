@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:log_viewer/src/tab_views/http_log_view.dart';
 import 'package:log_viewer/src/tab_views/log_view.dart';
+import 'package:log_viewer/src/tab_views/socket_view.dart';
 
 class LogViewer extends StatefulWidget {
   static void showDebugButton(BuildContext context) {
@@ -61,6 +62,7 @@ class _LogViewerState extends State<LogViewer>
               HttpLogModel.instance.clear();
               break;
             case 1:
+              SocketViewModel.instance.clear();
               break;
             case 2:
               LogViewModel.instance.clear();
@@ -85,7 +87,7 @@ class _LogViewerState extends State<LogViewer>
           Expanded(
               child: TabBarView(controller: _controller, children: const [
             HttpLogView(),
-            HttpLogView(),
+            SocketView(),
             LogView(),
           ]))
         ],
