@@ -53,45 +53,42 @@ class _LogViewerState extends State<LogViewer>
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData.light(useMaterial3: true),
-      child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            switch (_controller.index) {
-              case 0:
-                HttpLogModel.instance.clear();
-                break;
-              case 1:
-                break;
-              case 2:
-                LogViewModel.instance.clear();
-                break;
-            }
-          },
-          child: const Text("Clear"),
-        ),
-        appBar: AppBar(
-          title: const Text("Log Viewer"),
-        ),
-        body: Column(
-          children: [
-            TabBar(
-              controller: _controller,
-              tabs: const [
-                Text("HTTP"),
-                Text("Socket"),
-                Text("Log"),
-              ],
-            ),
-            Expanded(
-                child: TabBarView(controller: _controller, children: const [
-              HttpLogView(),
-              HttpLogView(),
-              LogView(),
-            ]))
-          ],
-        ),
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          switch (_controller.index) {
+            case 0:
+              HttpLogModel.instance.clear();
+              break;
+            case 1:
+              break;
+            case 2:
+              LogViewModel.instance.clear();
+              break;
+          }
+        },
+        child: const Text("Clear"),
+      ),
+      appBar: AppBar(
+        title: const Text("Log Viewer"),
+      ),
+      body: Column(
+        children: [
+          TabBar(
+            controller: _controller,
+            tabs: const [
+              Text("HTTP"),
+              Text("Socket"),
+              Text("Log"),
+            ],
+          ),
+          Expanded(
+              child: TabBarView(controller: _controller, children: const [
+            HttpLogView(),
+            HttpLogView(),
+            LogView(),
+          ]))
+        ],
       ),
     );
   }

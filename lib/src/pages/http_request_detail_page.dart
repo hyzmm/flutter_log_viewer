@@ -4,6 +4,16 @@ import 'package:flutter_json_view/flutter_json_view.dart';
 import 'package:log_viewer/src/tab_views/http_log_view.dart';
 import 'package:log_viewer/utils/format_date.dart';
 
+final jsonViewTheme = JsonViewTheme(
+    openIcon: const Text("➡️", style: TextStyle(color: Colors.white)),
+    closeIcon: const Text("⬅️", style: TextStyle(color: Colors.white)),
+    errorBuilder: (context, value) {
+      if (value == null) {
+        return const Text("null", style: TextStyle(color: Colors.white));
+      }
+      return const Text("Error");
+    });
+
 class HttpRequestDetailPage extends StatelessWidget {
   final HttpLog log;
 
@@ -11,25 +21,22 @@ class HttpRequestDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData.light(useMaterial3: true),
-      child: Scaffold(
-        appBar: AppBar(title: const Text("Request Detail")),
-        body: DefaultTabController(
-          length: 2,
-          child: Column(
-            children: [
-              const TabBar(tabs: [
-                Text("Request"),
-                Text("Response"),
-              ]),
-              Expanded(
-                  child: TabBarView(children: [
-                _RequestTab(log: log),
-                _ResponseTab(log: log),
-              ]))
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Request Detail")),
+      body: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            const TabBar(tabs: [
+              Text("Request"),
+              Text("Response"),
+            ]),
+            Expanded(
+                child: TabBarView(children: [
+              _RequestTab(log: log),
+              _ResponseTab(log: log),
+            ]))
+          ],
         ),
       ),
     );
@@ -106,6 +113,7 @@ class _RequestTab extends StatelessWidget {
   Widget _buildRequestUri(ThemeData theme) {
     return Card(
       child: ExpansionTile(
+        showTrailingIcon: false,
         dense: true,
         title: Text(
           log.request.uri.toString(),
@@ -146,6 +154,7 @@ class _RequestTab extends StatelessWidget {
   _buildParams(ThemeData theme) {
     return Card(
       child: ExpansionTile(
+        showTrailingIcon: false,
         enabled: log.request.queryParameters.isNotEmpty,
         title:
             const Text("Params", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -184,6 +193,7 @@ class _RequestTab extends StatelessWidget {
   _buildBody() {
     return Card(
       child: ExpansionTile(
+        showTrailingIcon: false,
         enabled: log.request.data != null,
         title:
             const Text("Body", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -191,13 +201,7 @@ class _RequestTab extends StatelessWidget {
           if (log.request.data != null)
             JsonView.map(
               log.request.data,
-              theme: JsonViewTheme(errorBuilder: (context, value) {
-                if (value == null) {
-                  return const Text("null",
-                      style: TextStyle(color: Colors.white));
-                }
-                return const Text("Error");
-              }),
+              theme: jsonViewTheme,
             ),
         ],
       ),
@@ -226,12 +230,7 @@ class _ResponseTab extends StatelessWidget {
   _buildResponseBody() {
     return JsonView.map(
       log.response!,
-      theme: JsonViewTheme(errorBuilder: (context, value) {
-        if (value == null) {
-          return const Text("null", style: TextStyle(color: Colors.white));
-        }
-        return const Text("Error");
-      }),
+      theme: jsonViewTheme,
     );
   }
 }
@@ -264,6 +263,7 @@ class Headers extends StatelessWidget {
 
     return Card(
       child: ExpansionTile(
+        showTrailingIcon: false,
         title: const Text("Headers",
             style: TextStyle(fontWeight: FontWeight.bold)),
         children: [
