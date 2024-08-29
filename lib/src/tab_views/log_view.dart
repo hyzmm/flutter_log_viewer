@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:log_viewer/utils/format_date.dart';
 import 'package:logger/logger.dart';
@@ -77,8 +78,16 @@ class LogView extends StatelessWidget {
 }
 
 class LogViewOutput extends LogOutput {
+  final bool usePrint;
+
+  LogViewOutput({this.usePrint = kDebugMode});
+
   @override
   void output(OutputEvent event) {
+    if (usePrint) {
+      // ignore: avoid_print
+      print(event.lines.join("\n"));
+    }
     LogViewModel.instance.addOutput(event);
   }
 }
