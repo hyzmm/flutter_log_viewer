@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:log_viewer/utils/format_date.dart';
 import 'package:logger/logger.dart';
 
@@ -32,8 +33,7 @@ class LogView extends StatelessWidget {
                       .map(
                         (level) => ChoiceChip(
                             selected: LogViewModel.instance.hasFilter(level),
-                            label:
-                                Text(level == Level.off ? "ALL" : level.name),
+                            label: Text(level == Level.off ? "ALL" : level.name),
                             onSelected: (value) {
                               if (value) {
                                 LogViewModel.instance.addFilter(level);
@@ -53,14 +53,15 @@ class LogView extends StatelessWidget {
                       final item = outputs[index];
                       return Card(
                         child: ListTile(
+                          onTap: () => Clipboard.setData(
+                              ClipboardData(text: item.origin.message.toString())),
                           horizontalTitleGap: 0,
                           visualDensity: VisualDensity.compact,
                           dense: true,
                           leading: Text(
                             item.level.name[0].toUpperCase(),
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: _getLevelColor(item.level)),
+                                fontWeight: FontWeight.bold, color: _getLevelColor(item.level)),
                           ),
                           title: Text(item.origin.message.toString()),
                           subtitle: Text(formatIntoHHMMSSmmm(item.origin.time)),
@@ -106,9 +107,7 @@ class LogViewModel extends ChangeNotifier {
 
   void removeFilter(Level level) {
     // 如果只有 ALL 选中了，那么不允许取消
-    if (level == Level.off &&
-        filters.length == 1 &&
-        filters.single == Level.off) {
+    if (level == Level.off && filters.length == 1 && filters.single == Level.off) {
       return;
     }
     filters.remove(level);
